@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#062e3f">
+    <meta name="Description" content="A dynamic and aesthetic To-Do List WebApp.">
+    <!-- Google Font: Work Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-2/css/all.min.css" integrity="sha256-46r060N2LrChLLb5zowXQ72/iKKNiw/lAmygmHExk/o=" crossorigin="anonymous" />
+    <link rel="shortcut icon" type="image/png" href="assets/favicon.png"/>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Work Sans', sans-serif;
+        }
+
+        body {
+            background: #062e3f;
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        /* Theme Styles */
+        .standard { background: #062e3f; color: #fff; }
+        .light { background: #f4f4f4; color: #333; }
+        .darker { background: #1a1a1a; color: #ccc; }
+
+        .standard-input { background: #094054; color: #fff; border: 1px solid #0a5068; }
+        .light-input { background: #fff; color: #333; border: 1px solid #ccc; }
+        .darker-input { background: #2a2a2a; color: #ccc; border: 1px solid #444; }
+
+        .standard-todo { background: #094054; }
+        .light-todo { background: #fff; }
+        .darker-todo { background: #2a2a2a; }
+
+        .standard-button { background: #0a5068; color: #fff; }
+        .light-button { background: #ddd; color: #333; }
+        .darker-button { background: #444; color: #ccc; }
+
+        .darker-title::after { border-bottom: 2px solid #ccc; }
+
+        #header {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .flexrow-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .theme-selector {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #fff;
+        }
+
+        .standard-theme { background: #062e3f; }
+        .light-theme { background: #f4f4f4; }
+        .darker-theme { background: #1a1a1a; }
+
+        h1#title {
+            font-size: 2.5rem;
+            font-weight: 600;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        h1#title::after {
+            content: '';
+            display: block;
+            width: 100px;
+            border-bottom: 2px solid #fff;
+            margin: 10px auto;
+        }
+
+        #form {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        form {
+            display: flex;
+            gap: 10px;
+            max-width: 600px;
+            width: 100%;
+            padding: 0 20px;
+        }
+
+        .todo-input {
+            flex: 1;
+            padding: 10px;
+            font-size: 1rem;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .todo-btn {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .todo-btn:hover {
+            opacity: 0.9;
+        }
+
+        #myUnOrdList {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .todo {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .todo-item {
+            flex: 1;
+            list-style: none;
+            font-size: 1.1rem;
+        }
+
+        .check-btn, .delete-btn {
+            padding: 8px;
+            margin-left: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .check-btn:hover, .delete-btn:hover {
+            opacity: 0.9;
+        }
+
+        .completed .todo-item {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+
+        .fall {
+            transform: translateY(8rem) rotateZ(20deg);
+            opacity: 0;
+            transition: all 0.8s ease;
+        }
+
+        #datetime {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+    </style>
+    <title>JUST DO IT</title>
+</head>
+<body>
+    <div id="header">
+        <div class="flexrow-container">
+            <div class="standard-theme theme-selector"></div>
+            <div class="light-theme theme-selector"></div>
+            <div class="darker-theme theme-selector"></div>
+        </div>
+        <h1 id="title">Just do it.</h1>
+    </div>
+
+    <div id="form">
+        <form>
+            <input class="todo-input" type="text" placeholder="Add a task.">
+            <button class="todo-btn standard-button" type="submit">I Got This!</button>
+        </form>
+    </div>
+
+    <p><span id="datetime"></span></p>
+
+    <div id="myUnOrdList">
+        <ul class="todo-list"></ul>
+    </div>
+
+    <script>
+        // Selectors
+        const toDoInput = document.querySelector('.todo-input');
+        const toDoBtn = document.querySelector('.todo-btn');
+        const toDoList = document.querySelector('.todo-list');
+        const standardTheme = document.querySelector('.standard-theme');
+        const lightTheme = document.querySelector('.light-theme');
+        const darkerTheme = document.querySelector('.darker-theme');
+
+        // Event Listeners
+        toDoBtn.addEventListener('click', addToDo);
+        toDoList.addEventListener('click', deleteCheck);
+        document.addEventListener("DOMContentLoaded", getTodos);
+        standardTheme.addEventListener('click', () => changeTheme('standard'));
+        lightTheme.addEventListener('click', () => changeTheme('light'));
+        darkerTheme.addEventListener('click', () => changeTheme('darker'));
+
+        // Apply saved theme or default to standard
+        let savedTheme = localStorage.getItem('savedTheme') || 'standard';
+        changeTheme(savedTheme);
+
+        // Functions
+        function addToDo(event) {
+            event.preventDefault();
+            if (toDoInput.value.trim() === '') {
+                alert("You must write something!");
+                return;
+            }
+
+            const toDoDiv = document.createElement("div");
+            toDoDiv.classList.add('todo', `${savedTheme}-todo`);
+
+            const newToDo = document.createElement('li');
+            newToDo.innerText = toDoInput.value;
+            newToDo.classList.add('todo-item');
+            toDoDiv.appendChild(newToDo);
+
+            saveLocal(toDoInput.value);
+
+            const checked = document.createElement('button');
+            checked.innerHTML = '<i class="fas fa-check"></i>';
+            checked.classList.add('check-btn', `${savedTheme}-button`);
+            toDoDiv.appendChild(checked);
+
+            const deleted = document.createElement('button');
+            deleted.innerHTML = '<i class="fas fa-trash"></i>';
+            deleted.classList.add('delete-btn', `${savedTheme}-button`);
+            toDoDiv.appendChild(deleted);
+
+            toDoList.appendChild(toDoDiv);
+            toDoInput.value = '';
+        }
+
+        function deleteCheck(event) {
+            const item = event.target;
+            if (item.classList[0] === 'delete-btn') {
+                const todo = item.parentElement;
+                todo.classList.add("fall");
+                removeLocalTodos(todo);
+                todo.addEventListener('transitionend', () => todo.remove());
+            }
+            if (item.classList[0] === 'check-btn') {
+                item.parentElement.classList.toggle("completed");
+            }
+        }
+
+        function saveLocal(todo) {
+            let todos = JSON.parse(localStorage.getItem('todos')) || [];
+            todos.push(todo);
+            localStorage.setItem('todos', JSON.stringify(todos));
+        }
+
+        function getTodos() {
+            let todos = JSON.parse(localStorage.getItem('todos')) || [];
+            todos.forEach(todo => {
+                const toDoDiv = document.createElement("div");
+                toDoDiv.classList.add("todo", `${savedTheme}-todo`);
+
+                const newToDo = document.createElement('li');
+                newToDo.innerText = todo;
+                newToDo.classList.add('todo-item');
+                toDoDiv.appendChild(newToDo);
+
+                const checked = document.createElement('button');
+                checked.innerHTML = '<i class="fas fa-check"></i>';
+                checked.classList.add("check-btn", `${savedTheme}-button`);
+                toDoDiv.appendChild(checked);
+
+                const deleted = document.createElement('button');
+                deleted.innerHTML = '<i class="fas fa-trash"></i>';
+                deleted.classList.add("delete-btn", `${savedTheme}-button`);
+                toDoDiv.appendChild(deleted);
+
+                toDoList.appendChild(toDoDiv);
+            });
+        }
+
+        function removeLocalTodos(todo) {
+            let todos = JSON.parse(localStorage.getItem('todos')) || [];
+            const todoIndex = todos.indexOf(todo.children[0].innerText);
+            todos.splice(todoIndex, 1);
+            localStorage.setItem('todos', JSON.stringify(todos));
+        }
+
+        function changeTheme(color) {
+            savedTheme = color;
+            localStorage.setItem('savedTheme', color);
+            document.body.className = color;
+            document.querySelector('input').className = `todo-input ${color}-input`;
+            document.getElementById('title').classList.toggle('darker-title', color === 'darker');
+
+            document.querySelectorAll('.todo').forEach(todo => {
+                todo.className = `todo ${color}-todo ${todo.classList.contains('completed') ? 'completed' : ''}`;
+            });
+
+            document.querySelectorAll('button').forEach(button => {
+                if (button.classList.contains('check-btn')) {
+                    button.className = `check-btn ${color}-button`;
+                } else if (button.classList.contains('delete-btn')) {
+                    button.className = `delete-btn ${color}-button`;
+                } else if (button.classList.contains('todo-btn')) {
+                    button.className = `todo-btn ${color}-button`;
+                }
+            });
+        }
+
+        // Update date and time
+        function updateDateTime() {
+            const now = new Date();
+            document.getElementById('datetime').innerText = now.toLocaleString();
+        }
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+    </script>
+</body>
+</html>
